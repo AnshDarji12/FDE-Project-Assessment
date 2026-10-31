@@ -24,25 +24,21 @@ Tips
 - Use a descriptive repo name (`teddypups-clone`) and paste the live URL + Loom link into the repo **About** panel and this README.
 - Do **not** commit `.env` (it's gitignored already).
 
-## 2. Deploy to Vercel (free, ~3 minutes)
+## 2. Deploy to Vercel
 
 1. Go to [vercel.com/new](https://vercel.com/new) and sign in with GitHub.
 2. **Import** the `teddypups-clone` repository.
 3. Framework preset is auto-detected as **Next.js** — leave build settings as-is.
-4. Add the environment variable:
+4. Create a hosted PostgreSQL database (for example, on [Neon](https://neon.tech)) and add its pooled and direct connection strings in **Project Settings → Environment Variables**:
    - Key: `DATABASE_URL`
-   - Value: `file:../db/custom.db`
-5. Click **Deploy** and wait for the build.
-6. Your live URL: `https://teddypups-clone.vercel.app` (rename in *Settings → Domains* if you like).
+   - Value: the provider's pooled PostgreSQL connection string
+   - Key: `DIRECT_URL`
+   - Value: the provider's direct PostgreSQL connection string (keep both private; do not commit them)
+5. Before accepting enquiries, set both values in local `.env` and run `bun run db:push` against the new, empty database.
+6. Click **Deploy** and wait for the build. The build generates the Prisma client automatically.
+7. Your live URL appears in the Vercel project dashboard.
 
-### Important: SQLite on Vercel
-
-SQLite writes to a local file, which is **ephemeral on serverless platforms**. The site will deploy and run perfectly; form submissions will show the friendly "message us on WhatsApp" fallback instead of persisting. Two options:
-
-| Option | How |
-| --- | --- |
-| **Demo mode (fine for the assessment)** | Leave as-is; the enquiry API validates and responds correctly, and the code path is visible in the repo. Mention it in your Loom video — interviewers love hearing you explain the trade-off. |
-| **Persistent DB (10 min)** | Create a free Postgres on [Neon](https://neon.tech) → set `DATABASE_URL` to the Neon connection string → change `provider = "postgresql"` in `prisma/schema.prisma` → run `bun run db:push` → redeploy. |
+For local development, copy `.env.example` to `.env`, set both connection strings, then run `bun run db:push`.
 
 ## 3. Record the Loom video
 
@@ -61,7 +57,7 @@ Follow `docs/LOOM_SCRIPT.md` — it walks through the exact flow the assignment 
 
 | Symptom | Fix |
 | --- | --- |
-| `PrismaClientInitializationError` | Run `bun run db:push` (creates `db/custom.db`). |
-| Form returns "could not save" | DB not reachable — check `DATABASE_URL`; on Vercel see the SQLite note above. |
+| `PrismaClientInitializationError` | Check that `DATABASE_URL` points to the pooled database endpoint and that the schema was pushed using `DIRECT_URL`. |
+| Form returns "could not save" | Check the database connection string and confirm the schema has been pushed with `bun run db:push`. |
 | Fonts look wrong | Ensure `src/fonts/*.woff2` exist and `bun run dev` was restarted after adding them. |
 | Images 404 | `public/media/**` must be present — it ships with the repo. |

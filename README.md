@@ -18,7 +18,7 @@ A production-grade, pixel-faithful clone of [puppy.instabizweb.com](https://pupp
 - **Next.js 16** (App Router, React Server Components, `generateStaticParams` + `generateMetadata`)
 - **TypeScript 5** (strict)
 - **Tailwind CSS 4** with a custom design-token layer (`@theme`, `@layer components`)
-- **Prisma ORM + SQLite** — stores enquiries from the puppy-profile and contact forms
+- **Prisma ORM + PostgreSQL** — stores enquiries from the puppy-profile and contact forms
 - **Zod** — request validation on the API route
 - **next/font/local** — the site's three variable fonts (Fraunces, Figtree, Shantell Sans) self-hosted for zero layout shift
 - **next/image** — responsive, lazy-loaded imagery with priority hints on above-the-fold shots
@@ -30,7 +30,7 @@ A production-grade, pixel-faithful clone of [puppy.instabizweb.com](https://pupp
 | Pages | `/`, `/puppies`, `/puppies/[slug]` (42 profiles), `/happy-families`, `/how-it-works`, `/faq`, `/gone-home`, `/contact`, custom 404 |
 | Filtering | Server-side filtering driven by URL search params (`?origin=`, `?breed=`, `?sex=`, `?korean=1`) with accessible chip UI — links are shareable & SEO-friendly |
 | Detail pages | Photo/video carousel with thumbnails & keyboard nav, spec grid, "what comes with" checklist, 4-step import journey, enquiry form, prev/next puppy navigation |
-| Forms | `POST /api/enquiry` → Zod validation → Prisma/SQLite; friendly success + error states (graceful WhatsApp fallback if DB is unavailable) |
+| Forms | `POST /api/enquiry` → Zod validation → Prisma/PostgreSQL; friendly success + error states (graceful WhatsApp fallback if DB is unavailable) |
 | Happy families | 64 polaroid cards with captions and a keyboard-accessible lightbox (Esc / ← / →) |
 | Design system | Palette (milk, honey, toffee, cocoa, blush, sky), three-font type scale, hand-drawn SVG doodles (paws, rings, signpost, book, door, basket), scalloped/wavy section edges, scroll-reveal animations |
 | Responsive | Mobile-first; sticky header, full-screen mobile menu, fixed WhatsApp/Call bottom bar with safe-area insets, floating WhatsApp bubble on desktop |
@@ -84,7 +84,8 @@ bun run lint
 
 | Variable | Purpose |
 | --- | --- |
-| `DATABASE_URL` | SQLite connection (e.g. `file:../db/custom.db`). Swap to any Postgres/Neon/Turso URL when moving to serverless hosting. |
+| `DATABASE_URL` | Pooled PostgreSQL connection string for the app. Copy `.env.example` to `.env` for local setup and set the real value in Vercel project settings. |
+| `DIRECT_URL` | Direct PostgreSQL connection string used by Prisma schema pushes and migrations. |
 
 ## Key implementation decisions
 
